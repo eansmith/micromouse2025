@@ -257,29 +257,33 @@ float wrapAngle(float angle) {
     return angle;
 }
 
+double getAngleDifference(double targetAngle, double currentAngle) {
+    double difference = targetAngle - currentAngle;
+
+    if (difference > 180.0) {
+        difference -= 360.0;
+    } else if (difference < -180.0) {
+        difference += 360.0;
+    }
+
+    return difference;
+}
+
 void Chassis::gyroTurnOrientation(double theta) {
     turnTargetTime = 0;
     mpu->update();
 
     // Convert target angle to the range [-180, 180]
-    double targetTheta = wrapAngle(mpu->getYaw() + theta);
-    /*while(abs(anglePID->getLastError()) >= angleError){
-        Serial.print("here\n");
-        updatePosition();
-        driveVector(0, turnPID->getOutput(currentPos.rotation, theta));
-        delayMicroseconds(5000);
-    }*/
-    do{
-        //printPosition();
-        //updatePosition();
+    double targetTheta = mpu->getYaw() + theta + 180;
 
-        //Serial.printf("here4");
-        
+    //getAngleDifference(targetTheta, mpu->getYaw() + 180);
+
+    do{
 
         if(mpu->update()){
 
-            driveVector(0, mpu->getYaw());
-            Serial.printf("last error: %f cur rot: %f target: %f\n", turnPID->getLastError(), mpu->getYaw(), targetTheta);
+            driveVector(0, turnPID->getOutput(-getAngleDifference(targetTheta, mpu->getYaw() + 180), 0));
+            Serial.printf("last error: %f cur rot: %f target: %f\n", turnPID->getLastError(), -getAngleDifference(targetTheta, mpu->getYaw() + 180), targetTheta);
             delayMicroseconds(5000);
         }
     } while (!turnIsSettled());

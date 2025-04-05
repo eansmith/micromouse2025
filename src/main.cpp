@@ -117,10 +117,10 @@ void turn_back(){
 
 void turn_left(){
   // chassis.moveForwardTile();
-  // delay(200);
-  // for(int i = 0; i < 100; i++){
-  //   mpu.update();
-  // }
+  delay(200);
+  for(int i = 0; i < 100; i++){
+     mpu.update();
+  }
   chassis.gyroTurnOrientation(-90);
   m_heading = left_from(m_heading);
 }
