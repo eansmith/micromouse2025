@@ -272,8 +272,13 @@ void Chassis::gyroTurnOrientation(double theta){
         //updatePosition();
 
         //Serial.printf("here4");
+        
+
         if(mpu->update()){
-            driveVector(0, turnPID->getOutput(mpu->getYaw(), targetTheta));
+            double currentYaw = mpu->getYaw();
+            double error = wrapAngle(targetTheta - currentYaw);
+            double output = turnPID->getOutput(error, 0);
+            driveVector(0, output);
             Serial.printf("last error: %f cur rot: %f target: %f\n", turnPID->getLastError(), mpu->getYaw(), targetTheta);
             delayMicroseconds(5000);
         }
