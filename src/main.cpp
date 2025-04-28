@@ -23,9 +23,6 @@ Encoder backLeftEnc(ENCODER_BACK_LEFT_B , ENCODER_BACK_LEFT_A);
 
 MPU9250 mpu;
 
-Sensor leftSideIR;
-Sensor rightSideIR;
-
 Sensor leftAngleIR;
 Sensor rightAngleIR;
 
@@ -48,6 +45,7 @@ MiniPID anglePID(0,000001,0,0);
 MiniPID turnPID(0.01,0.0000001,0.15);
 MiniPID distancePID(0.001,0.00000001,0);
 
+LedDisplay display(DISPLAY_IN, DISPLAY_RS, DISPLAY_CLK, DISPLAY_CE, DISPLAY_RST, DISPLAY_LENGTH);
 
 Location m_location;
 Heading m_heading;
@@ -167,10 +165,13 @@ void setup() {
   Wire1.begin();
 
   mpu.setup(0x68, MPU9250Setting(), Wire1);
+
+  display.begin();
+
   distancePID.setOutputRampRate(0.01);
 
-  //   pinMode(BUTTON_1, INPUT);
-  //   pinMode(BUTTON_2, INPUT);
+    pinMode(BUTTON_1, INPUT);
+    pinMode(BUTTON_2, INPUT);
 
     pinMode(MOTOR_LEFT_IN_1, OUTPUT);
     pinMode(MOTOR_LEFT_IN_2, OUTPUT);
@@ -208,21 +209,14 @@ void setup() {
 
     //pinMode(BUZZER, OUTPUT);
 
-    pinMode(MOTOR_STBY, OUTPUT);
-    digitalWrite(MOTOR_STBY, HIGH);
-
-    leftSideIR.setSensorPins(EMITTER_LEFT_HALF, IR_LEFT_SIDE);
-    leftSideIR.initSensor();
-    leftAngleIR.setSensorPins(EMITTER_LEFT_HALF, IR_LEFT_ANGLE);
-    leftAngleIR.initSensor();
-    leftFrontIR.setSensorPins(EMITTER_LEFT_HALF, IR_LEFT_FRONT);
-    leftFrontIR.initSensor();
-    rightSideIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_SIDE);
-    rightSideIR.initSensor();
-    rightAngleIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_ANGLE);
-    rightAngleIR.initSensor();
-    rightFrontIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_FRONT);
-    rightFrontIR.initSensor();
+    // leftAngleIR.setSensorPins(EMITTER_LEFT_HALF, IR_LEFT_ANGLE);
+    // leftAngleIR.initSensor();
+    // leftFrontIR.setSensorPins(EMITTER_LEFT_HALF, IR_LEFT_FRONT);
+    // leftFrontIR.initSensor();
+    // rightAngleIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_ANGLE);
+    // rightAngleIR.initSensor();
+    // rightFrontIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_FRONT);
+    // rightFrontIR.initSensor();
 
     chassis.setMotors(&backRightMotor, &backLeftMotor, &frontRightMotor, &frontLeftMotor);
     chassis.setChassisAttr(WHEEL_DIAMETER, ENCODER_TICKS_PER_WHEEL_ROTATION, WHEEL_TRACK);
@@ -259,22 +253,28 @@ void setup() {
 // Main loop
 void loop() {
 
-  // Use IR to start the mouse
-  digitalWrite(EMITTER_LEFT_HALF, HIGH);
-  while(900>analogRead(IR_LEFT_FRONT)){
-    delay(10);
-    mpu.update();
-  }
-  Serial.printf("begin\n");
-  delay(1000);
+  // // Use IR to start the mouse
+  // digitalWrite(EMITTER_LEFT_HALF, HIGH);
+  // while(900>analogRead(IR_LEFT_FRONT)){
+  //   delay(10);
+  //   mpu.update();
+  // }
+  // Serial.printf("begin\n");
+  // delay(1000);
 
-  // mpu.update();
-  // Serial.print(mpu.getYaw()); Serial.print(", ");
-  // Serial.print(mpu.getPitch()); Serial.print(", ");
-  // Serial.println(mpu.getRoll()); Serial.print("\n");
+  mpu.update();
+  Serial.print(mpu.getYaw()); Serial.print(", ");
+  Serial.print(mpu.getPitch()); Serial.print(", ");
+  Serial.print(mpu.getRoll()); Serial.print("\n");
+
+  display.home();
+  display.print(String(mpu.getYaw(), 2).substring(0, 4));
+
+  // move_ahead();
+  // delay(10000);
 
   // search_maze();
-  turn_left();
+  // turn_left();
   //delay(20000);
 
 
