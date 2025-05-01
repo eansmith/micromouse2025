@@ -50,13 +50,13 @@ void Motor::setRawPWM(int pwm, bool reverse){
     //Serial.printf("PWM: %d\n ", pwm);
     pwm = abs(pwm);
     if(!reverse){
-        digitalWrite(input1, LOW);
-        digitalWrite(input2, HIGH);
+        digitalWrite(input1, HIGH);
+        digitalWrite(input2, LOW);
         analogWrite(pwmPin, pwm);
     }
     else{
-        digitalWrite(input1, HIGH);
-        digitalWrite(input2, LOW);
+        digitalWrite(input1, LOW);
+        digitalWrite(input2, HIGH);
         analogWrite(pwmPin, pwm);
     }
 }

@@ -160,6 +160,7 @@ void search_maze(){
 
 // Setup the mouse
 void setup() {
+  
   Wire1.setClock(400000);
   Serial.begin(115200);
   Wire1.begin();
@@ -167,6 +168,9 @@ void setup() {
   mpu.setup(0x68, MPU9250Setting(), Wire1);
 
   display.begin();
+  display.home();
+  display.print("INIT");
+  delay(1000);
 
   distancePID.setOutputRampRate(0.01);
 
@@ -215,8 +219,8 @@ void setup() {
     // leftFrontIR.initSensor();
     // rightAngleIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_ANGLE);
     // rightAngleIR.initSensor();
-    // rightFrontIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_FRONT);
-    // rightFrontIR.initSensor();
+    rightFrontIR.setSensorPins(EMITTER_RIGHT_HALF, IR_RIGHT_FRONT);
+    rightFrontIR.initSensor();
 
     chassis.setMotors(&backRightMotor, &backLeftMotor, &frontRightMotor, &frontLeftMotor);
     chassis.setChassisAttr(WHEEL_DIAMETER, ENCODER_TICKS_PER_WHEEL_ROTATION, WHEEL_TRACK);
@@ -252,6 +256,37 @@ void setup() {
 
 // Main loop
 void loop() {
+  // Read button states (HIGH when pressed due to pull-down configuration)
+  bool button1Pressed = digitalRead(BUTTON_1) == HIGH;
+  bool button2Pressed = digitalRead(BUTTON_2) == HIGH;
+
+  digitalWrite(EMITTER_RIGHT_HALF, HIGH);
+  Serial.println(analogRead(IR_RIGHT_FRONT));
+  digitalWrite(EMITTER_RIGHT_HALF, LOW);
+  display.home();
+
+  if (button1Pressed) {
+    display.print("FWD ");
+    frontRightMotor.setRawPWM(100, false);
+    frontLeftMotor.setRawPWM(100, false);
+    backRightMotor.setRawPWM(100, false); 
+    backLeftMotor.setRawPWM(100, false);
+  } else if (button2Pressed) {
+    display.print("REV ");
+    frontRightMotor.setRawPWM(100, true);
+    frontLeftMotor.setRawPWM(100, true);
+    backRightMotor.setRawPWM(100, true);
+    backLeftMotor.setRawPWM(100, true);
+  } else {
+    mpu.update();
+    frontRightMotor.setRawPWM(0, false);
+    frontLeftMotor.setRawPWM(0, false);
+    backRightMotor.setRawPWM(0, false); 
+    backLeftMotor.setRawPWM(0, false);
+    display.print(String(mpu.getYaw(), 2).substring(0, 4));
+  }
+
+  delay(200); // Small delay to debounce and prevent flicker
 
   // // Use IR to start the mouse
   // digitalWrite(EMITTER_LEFT_HALF, HIGH);
@@ -262,23 +297,14 @@ void loop() {
   // Serial.printf("begin\n");
   // delay(1000);
 
-  mpu.update();
-  Serial.print(mpu.getYaw()); Serial.print(", ");
-  Serial.print(mpu.getPitch()); Serial.print(", ");
-  Serial.print(mpu.getRoll()); Serial.print("\n");
+  // mpu.update();
+  // Serial.print(mpu.getYaw()); Serial.print(", ");
+  // Serial.print(mpu.getPitch()); Serial.print(", ");
+  // Serial.print(mpu.getRoll()); Serial.print("\n");
 
-  display.home();
-  display.print(String(mpu.getYaw(), 2).substring(0, 4));
+  // display.home();
+  // display.print(String(mpu.getYaw(), 2).substring(0, 4));
 
-  // move_ahead();
-  // delay(10000);
-
-  // search_maze();
-  // turn_left();
-  //delay(20000);
-
-
-    
     /*Serial.printf("IMU test\n");
     while(true){
         // IMU.getGyro(&gyroData);
@@ -298,12 +324,6 @@ void loop() {
           Serial.print(mpu.getYaw()); Serial.print(", ");
           Serial.print(mpu.getPitch()); Serial.print(", ");
           Serial.println(mpu.getRoll()); Serial.print("\n");
-      }*/
-
-      /*if (mpu.update()) {
-        Serial.print(mpu.getYaw()); Serial.print(", ");
-        Serial.print(mpu.getPitch()); Serial.print(", ");
-        Serial.println(mpu.getRoll()); Serial.print("\n");
       }*/
 
       /*digitalWrite(EMITTER_LEFT_HALF, HIGH);
